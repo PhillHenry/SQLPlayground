@@ -1,6 +1,6 @@
 import Dependencies._
 
-ThisBuild / scalaVersion     := "3.1.1"
+ThisBuild / scalaVersion     := "3.3.1"
 ThisBuild / version          := "0.1.0"
 ThisBuild / organization     := "uk.co.odinconsultants"
 ThisBuild / organizationName := "OdinConsultants"
@@ -23,6 +23,7 @@ val commonSettings = List(
     Libraries.cats,
     Libraries.testkit,
     Libraries.quill,
+    Libraries.log4Cats,
     Libraries.sqlServer,
     Libraries.catsEffect,
     Libraries.kittens,
