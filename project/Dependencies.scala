@@ -46,6 +46,7 @@ object Dependencies {
     val fs2Core    = "co.fs2"        %% "fs2-core"            % V.fs2Core
     val kittens    = "org.typelevel" %% "kittens"             % V.kittens
     val testkit    = "org.typelevel" %% "cats-effect-testkit" % V.catsEffect % Test
+    val log4Cats   = "org.typelevel" %% "log4cats-slf4j"      % "2.6.0"
 
     val cirisCore    = "is.cir" %% "ciris"         % V.ciris
     val cirisRefined = "is.cir" %% "ciris-refined" % V.ciris
@@ -54,8 +55,9 @@ object Dependencies {
     val circeParser  = circe("parser")
     val circeRefined = circe("refined")
 
-    val doobieH2 = "org.tpolecat" %% "doobie-h2"   % V.doobie
-    val flyway   = "org.flywaydb"  % "flyway-core" % V.flyway
+    val doobieH2 = "org.tpolecat" %% "doobie-h2"    % V.doobie
+    val quill    = "io.getquill"  %% "quill-doobie" % "4.8.1"
+    val flyway   = "org.flywaydb"  % "flyway-core"  % V.flyway
 
     val http4sDsl     = http4s("dsl")
     val http4sServer  = http4s("ember-server")
@@ -104,6 +106,7 @@ object Dependencies {
 
     val ip4s = "com.comcast" %% "ip4s-core" % V.ip4s
 
+    val sqlServer = "com.microsoft.sqlserver" % "mssql-jdbc" % "12.6.0.jre11"
   }
 
 }

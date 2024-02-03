@@ -22,22 +22,13 @@ val commonSettings = List(
   libraryDependencies ++= Seq(
     Libraries.cats,
     Libraries.testkit,
+    Libraries.quill,
+    Libraries.sqlServer,
     Libraries.catsEffect,
-    Libraries.circeCore.value,
-    Libraries.circeParser.value,
-    Libraries.circeRefined.value,
-    Libraries.cirisCore,
-    Libraries.cirisRefined,
-    Libraries.fs2Core,
-    Libraries.fs2Kafka,
-    Libraries.http4sDsl,
-    Libraries.http4sMetrics,
-    Libraries.http4sServer,
     Libraries.kittens,
     Libraries.monocleCore.value,
     Libraries.neutronCore,
     Libraries.odin,
-    Libraries.redis4catsEffects,
     Libraries.refinedCore.value,
     Libraries.refinedCats.value,
     Libraries.ip4s,
@@ -82,15 +73,5 @@ lazy val it = (project in file("modules/it"))
       "ch.qos.logback" % "logback-classic" % "1.2.11" % Test
     )
   )
-
-lazy val docs = project
-  .in(file("docs"))
-  .settings(
-    mdocIn        := file("modules/docs"),
-    mdocOut       := file("target/docs"),
-    mdocVariables := Map("VERSION" -> version.value),
-  )
-  .dependsOn(core)
-  .enablePlugins(MdocPlugin)
 
 addCommandAlias("runLinter", ";scalafixAll --rules OrganizeImports")
