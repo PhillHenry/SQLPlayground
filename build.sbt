@@ -23,6 +23,7 @@ val commonSettings = List(
     Libraries.cats,
     Libraries.testkit,
     Libraries.quill,
+//    Libraries.doobieQuill,
     Libraries.log4Cats,
     Libraries.sqlServer,
     Libraries.catsEffect,

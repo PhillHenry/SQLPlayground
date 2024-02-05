@@ -31,8 +31,9 @@ object Dependencies {
 
     val organizeImports = "0.6.0"
 
-    val dockerJava = "3.2.13"
-    val ip4s       = "3.1.3"
+    val dockerJava         = "3.2.13"
+    val ip4s               = "3.1.3"
+    val documentationUtils = "0.13"
   }
 
   object Libraries {
@@ -55,9 +56,10 @@ object Dependencies {
     val circeParser  = circe("parser")
     val circeRefined = circe("refined")
 
-    val doobieH2 = "org.tpolecat" %% "doobie-h2"    % V.doobie
-    val quill    = "io.getquill"  %% "quill-doobie" % "4.8.1"
-    val flyway   = "org.flywaydb"  % "flyway-core"  % V.flyway
+    val doobieH2    = "org.tpolecat" %% "doobie-h2"    % V.doobie
+    val doobieQuill = "org.tpolecat" %% "doobie-quill" % "1.0.0-RC1"
+    val quill       = "io.getquill"  %% "quill-doobie" % "4.8.1"
+    val flyway      = "org.flywaydb"  % "flyway-core"  % V.flyway
 
     val http4sDsl     = http4s("dsl")
     val http4sServer  = http4s("ember-server")
@@ -107,6 +109,12 @@ object Dependencies {
     val ip4s = "com.comcast" %% "ip4s-core" % V.ip4s
 
     val sqlServer = "com.microsoft.sqlserver" % "mssql-jdbc" % "12.6.0.jre11"
+
+    val documentationUtilsScalaTest =
+      ("uk.co.odinconsultants.documentation_utils" %% "scalatest_utils" % V.documentationUtils)
+        .cross(CrossVersion.for3Use2_13)
+    val documentationUtilsCore =
+      "uk.co.odinconsultants.documentation_utils" % "core" % V.documentationUtils
   }
 
 }
