@@ -1,17 +1,13 @@
 package uk.co.odinconsultants.sql
-import cats.effect.{IO, IOApp, Sync}
-import org.typelevel.log4cats.Logger
-import org.typelevel.log4cats.slf4j.Slf4jLogger
-import io.getquill.{SqlServerJdbcContext, UpperCase}
+import cats.*
+import cats.effect.*
+import cats.implicits.*
 import doobie.*
 import doobie.implicits.*
 import doobie.util.transactor.Transactor
-import io.getquill.autoQuote
-import cats.*
-import cats.data.*
-import cats.effect.*
-import cats.implicits.*
-import cats.syntax.traverse.*
+import io.getquill.{SqlServerJdbcContext, UpperCase}
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -19,7 +15,7 @@ object MSSqlMain extends IOApp.Simple {
 
   implicit def logger[F[_]: Sync]: Logger[F] = Slf4jLogger.getLogger[F]
 
-  val TABLE_NAME = "test_table"
+  val TABLE_NAME         = "test_table"
   val ctx                = new SqlServerJdbcContext(UpperCase, "ctx")
   val xa: Transactor[IO] = Transactor.fromDataSource[IO](ctx.dataSource, ExecutionContext.global)
 
@@ -42,8 +38,8 @@ object MSSqlMain extends IOApp.Simple {
     transacted
   }
 
-  def insert(nRows: Int): Transactor[IO] => IO[Unit] = { case xa: Transactor[IO] =>
-    val inserts: List[ConnectionIO[Int]] = (0 to nRows).map { case i: Int =>
+  def insert(nRows: Int): Transactor[IO] => IO[Int] = { case xa: Transactor[IO] =>
+    val inserts: List[ConnectionIO[Int]] = (1 to nRows).map { case i: Int =>
       val sql = s"insert into $TABLE_NAME values ('${s"name$i"}', $i)"
       println(sql)
       Fragment.const(sql).update.run
@@ -51,16 +47,18 @@ object MSSqlMain extends IOApp.Simple {
     inserts.map(_.transact(xa)).sequence.map(_.sum)
   }
 
-  override def run: IO[Unit] = {
-//    List(IO.println("Creating table"), createTable, insert(10)).map(_(xa)).reduce(_ *> _).void
+  /** If the table does not exist, this prints:
+    * Create rows = 0, insert rows = 10
+    * If it does:
+    * Create rows = -1, insert rows = 10
+    * @return
+    */
+  override def run: IO[Unit] =
     for {
-      _ <- IO.println("Creating table...")
-      _ <- createTable(xa)
-      _ <- IO.println("Inserting...")
-      _ <- insert(10)(xa)
-    } yield {
-      println("Finished")
-    }
-  }
+      _          <- IO.println("Creating table...")
+      createRows <- createTable(xa)
+      _          <- IO.println("Inserting...")
+      insertRows <- insert(10)(xa)
+    } yield println(s"Create rows = $createRows, insert rows = $insertRows")
 
 }
