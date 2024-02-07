@@ -33,7 +33,8 @@ object Dependencies {
 
     val dockerJava         = "3.2.13"
     val ip4s               = "3.1.3"
-    val documentationUtils = "0.13"
+    val documentationUtils = "0.14"
+    val scalaTest          = "3.2.17"
   }
 
   object Libraries {
@@ -111,10 +112,12 @@ object Dependencies {
     val sqlServer = "com.microsoft.sqlserver" % "mssql-jdbc" % "12.6.0.jre11"
 
     val documentationUtilsScalaTest =
-      ("uk.co.odinconsultants.documentation_utils" %% "scalatest_utils" % V.documentationUtils)
+      ("uk.co.odinconsultants.documentation_utils" % "scalatest_utils" % V.documentationUtils)
         .cross(CrossVersion.for3Use2_13)
     val documentationUtilsCore =
-      "uk.co.odinconsultants.documentation_utils" % "core" % V.documentationUtils
+      ("uk.co.odinconsultants.documentation_utils" % "core" % V.documentationUtils)
+        .cross(CrossVersion.for3Use2_13)
+    val scalaTest = "org.scalatest" %% "scalatest" % V.scalaTest
   }
 
 }
