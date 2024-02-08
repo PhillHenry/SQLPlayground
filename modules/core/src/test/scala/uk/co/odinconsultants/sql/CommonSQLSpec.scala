@@ -10,15 +10,18 @@ import org.scalatest.GivenWhenThen
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import uk.co.odinconsultants.documentation_utils.SpecPretifier
-import uk.co.odinconsultants.sql.MSSqlMain.xa
+import uk.co.odinconsultants.sql.MSSqlMain.{xa, ctx}
 import uk.co.odinconsultants.sql.SqlServerUtils.ddlIfTableDoesNotExist
 import uk.co.odinconsultants.sql.SqlUtils.ddlFields
+import io.getquill.*
 
 case class Address(id: Int, location: String)
 
 case class Customer(id: Int, name: String, address: Int)
 
 class CommonSQLSpec extends SpecPretifier with GivenWhenThen {
+  
+  import ctx.*
 
   implicit def logger[F[_]: Sync]: Logger[F] = Slf4jLogger.getLogger[F]
 
@@ -34,6 +37,10 @@ class CommonSQLSpec extends SpecPretifier with GivenWhenThen {
    def someAddresses(n: Int): Seq[Address] = (0 to n).map(i => Address(i, s"address $i"))
 
    def someCustomers(n: Int, addressMod: Int): Seq[Customer] = (0 to n).map(i => Customer(i, s"name $i", i % addressMod))
+
+   def check[T] = {
+//     ctx.run(query[T]
+   }
 
   "Created table" should {
     "allow inserts" in {
@@ -52,6 +59,9 @@ class CommonSQLSpec extends SpecPretifier with GivenWhenThen {
         _ <- IO(When("we execute the SQL"))
         _ <- execute(addressDDL, xa)
         _ <- execute(customerDDL, xa)
+        _ <- IO(Then(s"the tables $customerTable and $addressTable exist but are empty"))
+        _ <- IO(assert(ctx.run(query[Customer]).size == 0))
+        _ <- IO(assert(ctx.run(query[Address]).size == 0))
       } yield ()
       program.unsafeRunSync()
     }
