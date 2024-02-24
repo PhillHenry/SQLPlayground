@@ -19,6 +19,7 @@ object MSSqlMain extends IOApp.Simple {
   val ctx                = new SqlServerJdbcContext(UpperCase, "ctx")
   val xa: Transactor[IO] = Transactor.fromDataSource[IO](ctx.dataSource, ExecutionContext.global)
 
+  // See https://stackoverflow.com/questions/6520999/create-table-if-not-exists-equivalent-in-sql-server
   val CREATE_TABLE_SQL = {
     val raw = s"""
                |    if not exists (select * from sysobjects where name='${TABLE_NAME}' and xtype='U')

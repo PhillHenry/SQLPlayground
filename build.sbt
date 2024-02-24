@@ -58,7 +58,7 @@ def dockerSettings(name: String) = List(
 
 lazy val root = (project in file("."))
   .settings(
-    name := "modernstack"
+    name := "SQLPlayground"
   )
   .aggregate(lib, core, it)
 
