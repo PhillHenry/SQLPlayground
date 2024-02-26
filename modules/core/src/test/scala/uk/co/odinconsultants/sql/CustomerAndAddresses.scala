@@ -7,9 +7,20 @@ import org.scalatest.GivenWhenThen
 import uk.co.odinconsultants.sql.MSSqlMain.{ctx, xa}
 import uk.co.odinconsultants.sql.SqlServerUtils.ddlIfTableDoesNotExist
 import uk.co.odinconsultants.sql.SqlUtils.ddlFields
+import uk.co.odinconsultants.sql.MSSqlMain.ctx
+import doobie.*
+import doobie.implicits.*
+import io.getquill.*
+import org.scalatest.GivenWhenThen
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+import uk.co.odinconsultants.documentation_utils.SpecPretifier
+import uk.co.odinconsultants.sql.MSSqlMain.ctx
 
 trait CustomerAndAddresses {
   this: GivenWhenThen =>
+
+  import ctx.*
 
   def execute(sql: String, xa: Transactor[IO]): IO[Int] =
     IO.println(s"Running: $sql") *> Fragment
@@ -37,8 +48,20 @@ trait CustomerAndAddresses {
   val customerDDL               = ddlIfTableDoesNotExist(customerTable, createCustomerSQL)
 
   val createTables: Resource[IO, Unit] = for {
-    _ <- Resource.make(IO(When("we execute the SQL")))(_ => IO.unit)
     _ <- dropAfter(addressDDL, addressTable)
     _ <- dropAfter(customerDDL, customerTable)
   } yield ()
+
+
+  def someAddresses(n: Int): Seq[Address] = (0 until n).map(i => Address(i, s"address $i"))
+
+  def someCustomers(n: Int, addressMod: Int): Seq[Customer] =
+    (0 until n).map(i => Customer(i, s"name $i", i % addressMod))
+
+  def createAddresses(n: Int) = IO {
+      val q = quote {
+        liftQuery(someAddresses(n).toList).foreach(a => query[Address].insertValue(a))
+      }
+      ctx.run(q)
+    }
 }

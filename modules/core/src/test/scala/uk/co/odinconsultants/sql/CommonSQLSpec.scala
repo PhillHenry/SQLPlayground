@@ -22,29 +22,19 @@ class CommonSQLSpec extends SpecPretifier with GivenWhenThen with CustomerAndAdd
 
   implicit def logger[F[_]: Sync]: Logger[F] = Slf4jLogger.getLogger[F]
 
-  def someAddresses(n: Int): Seq[Address] = (0 until n).map(i => Address(i, s"address $i"))
-
-  def someCustomers(n: Int, addressMod: Int): Seq[Customer] =
-    (0 until n).map(i => Customer(i, s"name $i", i % addressMod))
-
   "Created table" should {
     "allow inserts" in {
       val program                   = (
         for {
           _ <- Resource.make(
-                 IO(Given(s"SQL:\n${formatSQL(addressDDL)}\n${formatSQL(customerDDL)}"))
+                 IO(Given(s"SQL:\n${formatSQL(addressDDL)}\n${formatSQL(customerDDL)}")) *> IO(When("we execute the SQL"))
                )(_ => IO.unit).flatMap(_ => createTables)
         } yield ()
       ).use { case _ =>
         for {
           _ <- IO(And("we populate those tables"))
           n  = 5
-          _ <- IO.println(s"Creating $n addresses") *> IO {
-                 val q = quote {
-                   liftQuery(someAddresses(n).toList).foreach(a => query[Address].insertValue(a))
-                 }
-                 ctx.run(q)
-               }
+          _ <- IO.println(s"Creating $n addresses") *> createAddresses(n)
           _ <- IO.println(s"Creating $n customers") *> IO {
                  val q = quote {
                    liftQuery(someCustomers(n, n).toList).foreach(a =>
