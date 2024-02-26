@@ -4,7 +4,6 @@ import doobie.*
 import doobie.implicits.*
 import doobie.util.transactor.Transactor
 import io.getquill.*
-import io.getquill.doobie.*
 import org.scalatest.GivenWhenThen
 import uk.co.odinconsultants.sql.MSSqlMain.{ctx, xa}
 import uk.co.odinconsultants.sql.SqlServerUtils.ddlIfTableDoesNotExist
