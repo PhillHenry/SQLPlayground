@@ -12,10 +12,6 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import uk.co.odinconsultants.documentation_utils.SpecPretifier
 import uk.co.odinconsultants.sql.MSSqlMain.ctx
 
-case class Address(id: Int, location: String)
-
-case class Customer(id: Int, name: String, address: Int)
-
 class CommonSQLSpec extends SpecPretifier with GivenWhenThen with CustomerAndAddresses {
 
   import ctx.*

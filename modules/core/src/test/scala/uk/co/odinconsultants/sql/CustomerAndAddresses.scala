@@ -3,19 +3,16 @@ import cats.effect.{IO, Resource}
 import doobie.*
 import doobie.implicits.*
 import doobie.util.transactor.Transactor
+import io.getquill.*
+import io.getquill.doobie.*
 import org.scalatest.GivenWhenThen
 import uk.co.odinconsultants.sql.MSSqlMain.{ctx, xa}
 import uk.co.odinconsultants.sql.SqlServerUtils.ddlIfTableDoesNotExist
 import uk.co.odinconsultants.sql.SqlUtils.ddlFields
-import uk.co.odinconsultants.sql.MSSqlMain.ctx
-import doobie.*
-import doobie.implicits.*
-import io.getquill.*
-import org.scalatest.GivenWhenThen
-import org.typelevel.log4cats.Logger
-import org.typelevel.log4cats.slf4j.Slf4jLogger
-import uk.co.odinconsultants.documentation_utils.SpecPretifier
-import uk.co.odinconsultants.sql.MSSqlMain.ctx
+
+case class Address(id: Int, location: String)
+
+case class Customer(id: Int, name: String, address: Int)
 
 trait CustomerAndAddresses {
   this: GivenWhenThen =>
@@ -52,16 +49,22 @@ trait CustomerAndAddresses {
     _ <- dropAfter(customerDDL, customerTable)
   } yield ()
 
-
   def someAddresses(n: Int): Seq[Address] = (0 until n).map(i => Address(i, s"address $i"))
 
   def someCustomers(n: Int, addressMod: Int): Seq[Customer] =
     (0 until n).map(i => Customer(i, s"name $i", i % addressMod))
 
-  def createAddresses(n: Int) = IO {
-      val q = quote {
-        liftQuery(someAddresses(n).toList).foreach(a => query[Address].insertValue(a))
-      }
-      ctx.run(q)
+  def createAddresses(n: Int): IO[List[Long]] = IO {
+    val q = quote {
+      liftQuery(someAddresses(n).toList).foreach(a => query[Address].insertValue(a))
     }
+    ctx.run(q)
+  }
+
+  def createCusomters(n: Int): IO[List[Long]] = IO {
+    val q = quote {
+      liftQuery(someCustomers(n, n).toList).foreach(a => query[Customer].insertValue(a))
+    }
+    ctx.run(q)
+  }
 }
