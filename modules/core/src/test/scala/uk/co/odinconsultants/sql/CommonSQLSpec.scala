@@ -31,14 +31,7 @@ class CommonSQLSpec extends SpecPretifier with GivenWhenThen with CustomerAndAdd
           _ <- IO(And("we populate those tables"))
           n  = 5
           _ <- IO.println(s"Creating $n addresses") *> createAddresses(n)
-          _ <- IO.println(s"Creating $n customers") *> IO {
-                 val q = quote {
-                   liftQuery(someCustomers(n, n).toList).foreach(a =>
-                     query[Customer].insertValue(a)
-                   )
-                 }
-                 ctx.run(q)
-               }
+          _ <- IO.println(s"Creating $n customers") *> createCusomters(n)
           _ <- IO(Then(s"the tables $customerTable and $addressTable have $n rows in them"))
           _ <- IO(assert(ctx.run(query[Customer]).size == n))
           _ <- IO(assert(ctx.run(query[Address]).size == n))
