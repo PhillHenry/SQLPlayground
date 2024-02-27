@@ -8,6 +8,8 @@ import org.scalatest.GivenWhenThen
 import uk.co.odinconsultants.sql.MSSqlMain.{ctx, xa}
 import uk.co.odinconsultants.sql.SqlServerUtils.ddlIfTableDoesNotExist
 import uk.co.odinconsultants.sql.SqlUtils.ddlFields
+//import doobie.util.analysis.Analysis
+//import doobie.free.connection.ConnectionOp
 
 case class Address(id: Int, location: String)
 
@@ -17,6 +19,10 @@ trait CustomerAndAddresses {
   this: GivenWhenThen =>
 
   import ctx.*
+
+  def updateWithLogHandler(sql: String, xa: Transactor[IO]) = {
+    Fragment.const(sql).queryWithLogHandler[Address](LogHandler(println)).stream.transact(xa).evalMap(x => IO.println(x)).compile.drain
+  }
 
   def execute(sql: String, xa: Transactor[IO]): IO[Int] =
     IO.println(s"Running: $sql") *> Fragment

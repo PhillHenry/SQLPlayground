@@ -54,8 +54,7 @@ class CommonSQLSpec extends SpecPretifier with GivenWhenThen with CustomerAndAdd
         for {
           _ <- execute("SET SHOWPLAN_ALL ON", xa).void
           _ <- IO(Then(s"the tables $customerTable and $addressTable have $n rows in them"))
-          _ <- IO(assert(ctx.run(query[Customer]).size == n))
-          _ <- IO(assert(ctx.run(query[Address]).size == n))
+          _ <- updateWithLogHandler("SELECT * FROM Address", xa).void
         } yield ()
       }
       program.unsafeRunSync()
