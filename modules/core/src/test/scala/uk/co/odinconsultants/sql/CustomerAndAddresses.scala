@@ -8,6 +8,7 @@ import org.scalatest.GivenWhenThen
 import uk.co.odinconsultants.sql.MSSqlMain.{ctx, xa}
 import uk.co.odinconsultants.sql.SqlServerUtils.ddlIfTableDoesNotExist
 import uk.co.odinconsultants.sql.SqlUtils.ddlFields
+import fs2.Stream
 
 case class Address(id: Int, location: String)
 
@@ -19,7 +20,24 @@ trait CustomerAndAddresses {
   import ctx.*
 
   def queryWithLogHandler(sql: String, xa: Transactor[IO]) = {
-    Fragment.const(sql).queryWithLogHandler[Address](LogHandler(println)).stream.transact(xa).evalMap(x => IO.println(x)).compile.drain
+    val x = Fragment
+      .const(sql)
+      .queryWithLogHandler[String](LogHandler(println))
+      .stream
+
+
+    val y: ConnectionIO[Index] = Fragment
+      .const("SET SHOWPLAN_ALL ON")
+      .update
+      .run
+
+    (Stream.eval(y) ++ Fragment
+      .const(sql)
+      .queryWithLogHandler[String](LogHandler(println))
+      .stream).transact(xa)
+      .evalMap(x => IO.println(s"x = $x"))
+      .compile
+      .drain
   }
 
   def execute(sql: String, xa: Transactor[IO]): IO[Int] =

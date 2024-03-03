@@ -10,6 +10,8 @@ import org.typelevel.log4cats.slf4j.Slf4jLogger
 import uk.co.odinconsultants.documentation_utils.SpecPretifier
 import uk.co.odinconsultants.sql.MSSqlMain.{ctx, xa}
 
+import java.sql.Connection
+
 class CommonSQLSpec extends SpecPretifier with GivenWhenThen with CustomerAndAddresses {
 
   import ctx.*
@@ -43,6 +45,12 @@ class CommonSQLSpec extends SpecPretifier with GivenWhenThen with CustomerAndAdd
     }
   }
   "Query plan" should {
+    val connection: Resource[IO, Connection] = for {
+      cnxn <- Resource.make( IO {
+        ctx.dataSource.getConnection
+      })(cnxn => IO{cnxn.close()})
+    } yield cnxn
+//    val showPlan = for
     "give metrics for select" in {
       val n       = 5
       val program = (
@@ -52,9 +60,21 @@ class CommonSQLSpec extends SpecPretifier with GivenWhenThen with CustomerAndAdd
         } yield ()
       ).use { case _ =>
         for {
-          _ <- execute("SET SHOWPLAN_ALL ON", xa).void
+          _ <- connection.use { case cnxn: Connection =>
+            IO {
+              cnxn.setAutoCommit(false)
+              cnxn.createStatement.executeUpdate("SET SHOWPLAN_ALL ON")
+              cnxn.createStatement.executeQuery("SET NOCOUNT ON")
+              val stmt = cnxn.createStatement
+              stmt.execute("SELECT * FROM Address")
+              
+              val rs = stmt.getResultSet
+              while(rs.next()) {
+                println(rs.getString(1))
+              }
+            }
+          }
           _ <- IO(Then(s"the tables $customerTable and $addressTable have $n rows in them"))
-          _ <- queryWithLogHandler("SELECT * FROM Address", xa).void
         } yield ()
       }
       program.unsafeRunSync()
